@@ -18,7 +18,7 @@
 <div class="bg-green-50 p-4 rounded-lg">
 <p class="text-sm text-green-800">📱 Scansiona documenti con WhatsApp</p>
 </div>
-<input type="tel" id="telefono" placeholder="Il tuo numero (339xxxxxxx)"
+<input type="tel" id="telefono" placeholder="Il tuo numero "+393383556577"
                   class="w-full p-3 border rounded-lg text-center">
 <button onclick="entra()"
                    class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700">
