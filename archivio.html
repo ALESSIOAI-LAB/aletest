@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I miei documenti - DocuBot</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+<!-- Header -->
+<div class="bg-green-600 text-white p-4 sticky top-0 z-10">
+<div class="max-w-md mx-auto flex items-center justify-between">
+<h1 class="text-xl font-bold">📁 Documenti</h1>
+<a href="scadenze.html" class="text-sm bg-green-700 px-3 py-1 rounded-full">📅 Scadenze</a>
+</div>
+<input type="text" id="cerca" placeholder="Cerca documento..."
+              class="mt-3 w-full p-2 rounded text-gray-800 text-sm">
+</div>
+<!-- Lista -->
+<div id="lista" class="max-w-md mx-auto p-4 space-y-3">
+<div class="text-center p-8 text-gray-500">Caricamento...</div>
+</div>
+<!-- Bottom nav -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t p-3">
+<div class="max-w-md mx-auto flex justify-around text-sm">
+<a href="archivio.html" class="text-green-600 font-bold">📁 Archivio</a>
+<a href="scadenze.html" class="text-gray-600">📅 Scadenze</a>
+<a href="https://wa.me/TUONUMERO" class="text-gray-600">📱 Scan</a>
+</div>
+</div>
+<div class="h-16"></div> <!-- Spazio per bottom nav -->
+<script>
+       const params = new URLSearchParams(location.search);
+       const tel = params.get('tel') || localStorage.getItem('doctel');
+       if(!tel) location.href = 'index.html';
+       // Salva per navigazione
+       localStorage.setItem('doctel', tel);
+       // DATI FINTI PER TEST (poi sostituisci con API n8n)
+       const documentiFinti = [
+           {
+               id: 'doc1',
+               entity_name: 'ENEL Energia',
+               document_type: 'Bolletta',
+               amount: '124.50',
+               due_date: '2025-04-15',
+               category: 'utenze',
+               thumbnail: 'https://via.placeholder.com/100x100/25D366/ffffff?text=ENEL'
+           },
+           {
+               id: 'doc2',
+               entity_name: 'Assicurazione XYZ',
+               document_type: 'Polizza',
+               amount: '450.00',
+               due_date: '2025-05-20',
+               category: 'assicurazione',
+               thumbnail: 'https://via.placeholder.com/100x100/3B82F6/ffffff?text=ASS'
+           },
+           {
+               id: 'doc3',
+               entity_name: 'Fornitore ABC',
+               document_type: 'Fattura',
+               amount: '890.00',
+               due_date: '2025-03-30',
+               category: 'forniture',
+               thumbnail: 'https://via.placeholder.com/100x100/EF4444/ffffff?text=FATT'
+           }
+       ];
+       function mostraDocumenti(docs) {
+           const container = document.getElementById('lista');
+           container.innerHTML = '';
+           if(docs.length === 0) {
+               container.innerHTML = '<div class="text-center p-8 text-gray-500">Nessun documento. Scansiona il primo con WhatsApp!</div>';
+               return;
+           }
+           docs.forEach(d => {
+               const giorni = Math.ceil((new Date(d.due_date) - new Date()) / (1000*60*60*24));
+               const scadenzaColor = giorni < 0 ? 'text-red-600' : giorni < 7 ? 'text-orange-600' : 'text-green-600';
+               const scadenzaBg = giorni < 0 ? 'bg-red-100' : giorni < 7 ? 'bg-orange-100' : 'bg-green-100';
+               const div = document.createElement('div');
+               div.className = 'bg-white rounded-lg shadow p-3 flex gap-3 cursor-pointer hover:shadow-md transition';
+               div.onclick = () => location.href = 'documento.html?id=' + d.id;
+               div.innerHTML = `
+<img src="${d.thumbnail}" class="w-20 h-20 object-cover rounded-lg bg-gray-200">
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs px-2 py-0.5 rounded-full ${scadenzaBg} ${scadenzaColor} font-bold">
+                               ${giorni < 0 ? 'SCADUTO' : giorni + ' gg'}
+</span>
+<span class="text-xs text-gray-500 uppercase">${d.document_type}</span>
+</div>
+<h3 class="font-bold text-gray-800 truncate">${d.entity_name}</h3>
+<p class="text-green-600 font-bold">€${d.amount}</p>
+<p class="text-xs text-gray-500">Scade: ${new Date(d.due_date).toLocaleDateString('it-IT')}</p>
+</div>
+<div class="text-gray-400">›</div>
+               `;
+               container.appendChild(div);
+           });
+       }
+       // Mostra dati finti (per test)
+       mostraDocumenti(documentiFinti);
+       // Quando hai n8n pronto, sostituisci con:
+       // fetch('https://TUO-N8N.com/webhook/lista?tel=' + tel)
+       //     .then(r => r.json())
+       //     .then(mostraDocumenti);
+       // Filtro ricerca
+       document.getElementById('cerca').oninput = (e) => {
+           const term = e.target.value.toLowerCase();
+           const filtrati = documentiFinti.filter(d =>
+               d.entity_name.toLowerCase().includes(term) ||
+               d.document_type.toLowerCase().includes(term)
+           );
+           mostraDocumenti(filtrati);
+       };
+</script>
+</body>
+</html>
